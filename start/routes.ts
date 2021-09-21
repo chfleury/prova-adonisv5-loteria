@@ -25,3 +25,11 @@ Route.get('/', async () => {
 })
 
 Route.post('login', 'AuthController.login')
+
+// Route.group(() => {
+//  Route.resource('users', 'UserController')
+
+// }).prefix('/users')
+Route.resource('users', 'UsersController')
+Route.resource('bets', 'BetsController')
+Route.resource('games', 'GamesController')
