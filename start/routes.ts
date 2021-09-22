@@ -25,11 +25,20 @@ Route.get('/', async () => {
 })
 
 Route.post('login', 'AuthController.login')
+Route.post('users', 'UsersController.store')
 
 // Route.group(() => {
 //  Route.resource('users', 'UserController')
 
 // }).prefix('/users')
-Route.resource('users', 'UsersController')
-Route.resource('bets', 'BetsController')
-Route.resource('games', 'GamesController')
+
+Route.group(() => {
+  Route.get('users', 'UsersController.index')
+  Route.get('users/:id', 'UsersController.show')
+
+  Route.resource('bets', 'BetsController')
+  Route.resource('games', 'GamesController')
+
+  Route.post('forgot_password', 'ForgotPasswordController.store')
+  Route.put('forgot_password', 'ForgotPasswordController.update')
+}).middleware('auth')
