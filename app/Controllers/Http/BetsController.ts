@@ -1,5 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Mail from '@ioc:Adonis/Addons/Mail'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import { DateTime } from 'luxon'
 
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
@@ -16,7 +18,21 @@ export default class BetsController {
     return await Bet.findOrFail(id)
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
+    const newSchema = schema.create({
+      gameId: schema.number(),
+      userId: schema.number(),
+      selectedNumbers: schema.string(),
+    })
+
+    try {
+      await request.validate({
+        schema: newSchema,
+      })
+    } catch (error) {
+      return response.badRequest(error.messages)
+    }
+
     const { gameId, userId, selectedNumbers } = request.body()
 
     const user = await User.findOrFail(userId)
@@ -30,6 +46,10 @@ export default class BetsController {
       selectedNumbers,
       totalPrice,
     })
+
+    user.lastBetAt = DateTime.now()
+
+    await user.save()
 
     await Mail.send((message) => {
       message

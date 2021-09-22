@@ -10,7 +10,7 @@ export default class Users extends BaseSchema {
       table.string('password').notNullable()
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
-      table.dateTime('last_login_at')
+      table.dateTime('last_bet_at')
     })
   }
 

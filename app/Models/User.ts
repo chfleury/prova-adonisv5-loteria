@@ -40,5 +40,5 @@ export default class User extends BaseModel {
   public updatedAt: DateTime
 
   @column.dateTime({})
-  public lastLoginAt: DateTime
+  public lastBetAt: DateTime
 }
