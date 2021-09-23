@@ -12,6 +12,7 @@ Route.group(() => {
   Route.get('users/:id', 'UsersController.show')
 
   Route.resource('bets', 'BetsController')
+
   Route.resource('games', 'GamesController')
 
   Route.post('forgot_password', 'ForgotPasswordController.store')

@@ -83,8 +83,9 @@ export default class BetsController {
   }
 
   public async update({ request, response }: HttpContextContract) {
+    const { id } = request.params()
+
     const newSchema = schema.create({
-      id: schema.number(),
       gameId: schema.number(),
       userId: schema.number(),
       selectedNumbers: schema.string(),
@@ -100,7 +101,7 @@ export default class BetsController {
     }
 
     try {
-      const { id, gameId, userId, selectedNumbers, isDeleted } = request.body()
+      const { gameId, userId, selectedNumbers, isDeleted } = request.body()
       const bet = await Bet.findOrFail(id)
       bet.gameId = gameId
       bet.userId = userId

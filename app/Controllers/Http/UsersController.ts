@@ -1,5 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Mail from '@ioc:Adonis/Addons/Mail'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 import User from 'App/Models/User'
 
@@ -14,7 +15,20 @@ export default class UsersController {
     return await User.findOrFail(id)
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
+    const newSchema = schema.create({
+      email: schema.string({}, [rules.email]),
+      password: schema.string({}, [rules.confirmed()]),
+    })
+
+    try {
+      await request.validate({
+        schema: newSchema,
+      })
+    } catch (error) {
+      return response.badRequest(error.messages)
+    }
+
     const { email, password } = request.body()
 
     const user = await User.create({
@@ -34,7 +48,20 @@ export default class UsersController {
     return user
   }
 
-  public async update({ request }: HttpContextContract) {
+  public async update({ request, response }: HttpContextContract) {
+    const newSchema = schema.create({
+      email: schema.string({}, [rules.email]),
+      password: schema.string({}, [rules.confirmed()]),
+    })
+
+    try {
+      await request.validate({
+        schema: newSchema,
+      })
+    } catch (error) {
+      return response.badRequest(error.messages)
+    }
+
     const { email, password } = request.body()
     const { id } = request.params()
 
@@ -45,8 +72,16 @@ export default class UsersController {
     return user
   }
 
-  public async destroy({}: HttpContextContract) {
-    // const { id } = request.params()
-    return 'destroy'
+  public async destroy({ request, response }: HttpContextContract) {
+    const { id } = request.params()
+
+    try {
+      const user = await User.findOrFail(id)
+      await user.delete()
+
+      return { message: 'Delete sucessful' }
+    } catch (e) {
+      return response.badRequest('Invalid id!')
+    }
   }
 }

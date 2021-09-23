@@ -2,12 +2,25 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import crypto from 'crypto'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import moment from 'moment'
-
-import User from 'App/Models/User'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import { DateTime } from 'luxon'
 
+import User from 'App/Models/User'
+
 export default class ForgotPasswordController {
-  public async store({ request }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
+    const newSchema = schema.create({
+      email: schema.string({}, [rules.email()]),
+    })
+
+    try {
+      await request.validate({
+        schema: newSchema,
+      })
+    } catch (error) {
+      return response.badRequest(error.messages)
+    }
+
     const { email } = request.body()
 
     const user = await User.findByOrFail('email', email)
@@ -27,6 +40,19 @@ export default class ForgotPasswordController {
   }
 
   public async update({ request, response }: HttpContextContract) {
+    const newSchema = schema.create({
+      token: schema.string({}),
+      password: schema.string({}, [rules.confirmed()]),
+    })
+
+    try {
+      await request.validate({
+        schema: newSchema,
+      })
+    } catch (error) {
+      return response.badRequest(error.messages)
+    }
+
     const { token, password } = request.body()
 
     const user = await User.findByOrFail('token', token)
