@@ -6,13 +6,13 @@ import User from 'App/Models/User'
 
 export default class UsersController {
   public async index() {
-    return await User.all()
+    return await User.query().preload('profile')
   }
 
   public async show({ request }: HttpContextContract) {
     const { id } = request.params()
 
-    return await User.findOrFail(id)
+    return await User.query().where('id', id).preload('profile')
   }
 
   public async store({ request, response }: HttpContextContract) {

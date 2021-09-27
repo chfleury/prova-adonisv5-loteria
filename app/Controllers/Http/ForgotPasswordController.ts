@@ -52,21 +52,25 @@ export default class ForgotPasswordController {
     } catch (error) {
       return response.badRequest(error.messages)
     }
+    try {
+      const { token, password } = request.body()
 
-    const { token, password } = request.body()
+      const user = await User.findByOrFail('token', token)
 
-    const user = await User.findByOrFail('token', token)
+      const tokenExpired = moment().subtract('15', 'days').isAfter(user.tokenCreatedAt)
 
-    const tokenExpired = moment().subtract('2', 'days').isAfter(user.tokenCreatedAt)
+      if (tokenExpired) {
+        return response.status(401).send({ error: 'Token expirado' })
+      }
 
-    if (tokenExpired) {
-      return response.status(401).send({ error: 'Token expirado' })
+      user.token = null
+      user.tokenCreatedAt = null
+      user.password = password
+
+      await user.save()
+      return user
+    } catch (error) {
+      return { error: 'Please retry with valid token (the token expires in 15 days)' }
     }
-
-    user.token = null
-    user.tokenCreatedAt = null
-    user.password = password
-
-    await user.save
   }
 }

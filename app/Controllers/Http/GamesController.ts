@@ -18,7 +18,7 @@ export default class GamesController {
     const newSchema = schema.create({
       type: schema.string({}),
       description: schema.string({}),
-      range: schema.string({}),
+      range: schema.number(),
       price: schema.number(),
       maxNumber: schema.number(),
       color: schema.string({}),

@@ -10,13 +10,13 @@ import Game from 'App/Models/Game'
 
 export default class BetsController {
   public async index() {
-    return await Bet.all()
+    return await Bet.query().preload('game').preload('user')
   }
 
   public async show({ request, response }: HttpContextContract) {
     try {
       const { id } = request.params()
-      return await Bet.findOrFail(id)
+      return await Bet.query().where('id', id).preload('user').preload('game')
     } catch (e) {
       return response.badRequest('Invalid id!')
     }
