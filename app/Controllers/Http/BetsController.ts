@@ -8,6 +8,7 @@ import User from 'App/Models/User'
 import Game from 'App/Models/Game'
 import CreateBetValidator from 'App/Validators/CreateBetValidator'
 import UpdateBetValidator from 'App/Validators/UpdateBetValidator'
+import NewBetMailer from 'App/Mailers/NewBetMailer'
 
 export default class BetsController {
   public async index() {
@@ -48,20 +49,11 @@ export default class BetsController {
 
       user.lastBetAt = DateTime.now()
 
-      await (await user.save()).useTransaction(trx)
+      user.useTransaction(trx)
+      await user.save()
 
-      await Mail.send((message) => {
-        message
-          .from('prova@example.com')
-          .to(user.email)
-          .subject('Nova aposta realizada')
-          .htmlView('emails/new_bet', {
-            email: user.email,
-            gameType: game.type,
-            selectedNumbers,
-            totalPrice,
-          })
-      })
+      await new NewBetMailer(user, game, selectedNumbers, totalPrice).sendLater()
+
       await trx.commit()
 
       return bet

@@ -1,7 +1,8 @@
 import { BaseTask } from 'adonis5-scheduler/build'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import Database from '@ioc:Adonis/Lucid/Database'
 import moment from 'moment'
+
+import OfferBetMailer from 'App/Mailers/OfferBetMailer'
 
 export default class MailScheduler extends BaseTask {
   public static get schedule() {
@@ -23,21 +24,10 @@ export default class MailScheduler extends BaseTask {
 
     console.log(users)
 
-    for (let i = 0; i < users.length; i++) { 
+    for (let i = 0; i < users.length; i++) {
       const user = users[i]
-      await Mail.send((message) => {
-        message
-          .from('prova@example.com')
-          .to(user.email)
-          .subject('Você não aposta há 7 dias!')
-          .htmlView('emails/offer_bet', {
-            email: user.email,
-          })
-      })
-
-
-    // users.forEach(
-    // })
+      await new OfferBetMailer(user).send()
+    }
 
     this.logger.info('Handled')
   }

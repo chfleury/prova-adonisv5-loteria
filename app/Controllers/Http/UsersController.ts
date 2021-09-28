@@ -1,8 +1,8 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import UserValidator from 'App/Validators/UserValidator'
 
 import User from 'App/Models/User'
+import NewUserMailer from 'App/Mailers/NewUserMailer'
 
 export default class UsersController {
   public async index() {
@@ -26,13 +26,7 @@ export default class UsersController {
       profileId: 2,
     })
 
-    await Mail.send((message) => {
-      message
-        .from('prova@example.com')
-        .to(user.email)
-        .subject('Cadastro realizado')
-        .htmlView('emails/user_registered', { email: user.email })
-    })
+    await new NewUserMailer(user).send()
 
     return user
   }

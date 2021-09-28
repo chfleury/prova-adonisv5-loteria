@@ -1,12 +1,12 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import crypto from 'crypto'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import moment from 'moment'
 import { DateTime } from 'luxon'
 
 import User from 'App/Models/User'
 import UserValidator from 'App/Validators/UserValidator'
 import EmailValidator from 'App/Validators/EmailValidator'
+import ForgotPasswordMailer from 'App/Mailers/ForgotPasswordMailer'
 
 export default class ForgotPasswordController {
   public async store({ request }: HttpContextContract) {
@@ -20,13 +20,7 @@ export default class ForgotPasswordController {
 
     await user.save()
 
-    await Mail.send((message) => {
-      message
-        .from('prova@example.com')
-        .to(user.email)
-        .subject('Redefinição de senha')
-        .htmlView('emails/forgot_password', { email: user.email, token: user.token })
-    })
+    await new ForgotPasswordMailer(user).send()
   }
 
   public async update({ request, response }: HttpContextContract) {
