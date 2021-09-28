@@ -1,8 +1,18 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
+import {
+  BaseModel,
+  column,
+  beforeSave,
+  belongsTo,
+  BelongsTo,
+  hasMany,
+  HasMany,
+} from '@ioc:Adonis/Lucid/Orm'
+
 import Hash from '@ioc:Adonis/Core/Hash'
 
 import Profile from 'App/Models/Profile'
+import Bet from 'App/Models/Bet'
 
 export default class User extends BaseModel {
   @beforeSave()
@@ -14,6 +24,9 @@ export default class User extends BaseModel {
 
   @belongsTo(() => Profile)
   public profile: BelongsTo<typeof Profile>
+
+  @hasMany(() => Bet)
+  public bet: HasMany<typeof Bet>
 
   @column({ isPrimary: true })
   public id: number

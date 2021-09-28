@@ -1,5 +1,4 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Mail from '@ioc:Adonis/Addons/Mail'
 import { DateTime } from 'luxon'
 import Database from '@ioc:Adonis/Lucid/Database'
 
