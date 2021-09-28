@@ -1,7 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { schema } from '@ioc:Adonis/Core/Validator'
 
 import Game from 'App/Models/Game'
+import GameValidator from 'App/Validators/GameValidator'
 
 export default class GamesController {
   public async index() {
@@ -14,24 +14,8 @@ export default class GamesController {
     return await Game.findOrFail(id)
   }
 
-  public async store({ request, response }: HttpContextContract) {
-    const newSchema = schema.create({
-      type: schema.string({}),
-      description: schema.string({}),
-      range: schema.number(),
-      price: schema.number(),
-      maxNumber: schema.number(),
-      color: schema.string({}),
-      minCartValue: schema.number(),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
+  public async store({ request }: HttpContextContract) {
+    await request.validate(GameValidator)
 
     const { type, description, range, price, maxNumber, color, minCartValue } = request.body()
 
@@ -48,26 +32,10 @@ export default class GamesController {
     return game
   }
 
-  public async update({ request, response }: HttpContextContract) {
+  public async update({ request }: HttpContextContract) {
     const { id } = request.params()
 
-    const newSchema = schema.create({
-      type: schema.string({}),
-      description: schema.string({}),
-      range: schema.string({}),
-      price: schema.number(),
-      maxNumber: schema.number(),
-      color: schema.string({}),
-      minCartValue: schema.number(),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
+    await request.validate(GameValidator)
 
     const { type, description, range, price, maxNumber, color, minCartValue } = request.body()
 

@@ -1,12 +1,13 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Mail from '@ioc:Adonis/Addons/Mail'
-import { schema } from '@ioc:Adonis/Core/Validator'
 import { DateTime } from 'luxon'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
 import Game from 'App/Models/Game'
+import CreateBetValidator from 'App/Validators/CreateBetValidator'
+import UpdateBetValidator from 'App/Validators/UpdateBetValidator'
 
 export default class BetsController {
   public async index() {
@@ -22,22 +23,10 @@ export default class BetsController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request }: HttpContextContract) {
+    await request.validate(CreateBetValidator)
+
     const trx = await Database.transaction()
-
-    const newSchema = schema.create({
-      gameId: schema.number(),
-      userId: schema.number(),
-      selectedNumbers: schema.string(),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
 
     try {
       const { gameId, userId, selectedNumbers } = request.body()
@@ -47,14 +36,15 @@ export default class BetsController {
       const game = await Game.findOrFail(gameId)
       const totalPrice = game.price
 
-      const bet = await (
-        await Bet.create({
+      const bet = await Bet.create(
+        {
           gameId,
           userId,
           selectedNumbers,
           totalPrice,
-        })
-      ).useTransaction(trx)
+        },
+        { client: trx }
+      )
 
       user.lastBetAt = DateTime.now()
 
@@ -83,22 +73,9 @@ export default class BetsController {
   }
 
   public async update({ request, response }: HttpContextContract) {
+    await request.validate(UpdateBetValidator)
+
     const { id } = request.params()
-
-    const newSchema = schema.create({
-      gameId: schema.number(),
-      userId: schema.number(),
-      selectedNumbers: schema.string(),
-      isDeleted: schema.boolean(),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
 
     try {
       const { gameId, userId, selectedNumbers, isDeleted } = request.body()

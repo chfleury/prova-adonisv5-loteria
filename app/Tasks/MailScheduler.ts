@@ -22,7 +22,9 @@ export default class MailScheduler extends BaseTask {
       .where('last_bet_at', '<', lastWeek)
 
     console.log(users)
-    users.forEach(async (user) => {
+
+    for (let i = 0; i < users.length; i++) { 
+      const user = users[i]
       await Mail.send((message) => {
         message
           .from('prova@example.com')
@@ -32,7 +34,10 @@ export default class MailScheduler extends BaseTask {
             email: user.email,
           })
       })
-    })
+
+
+    // users.forEach(
+    // })
 
     this.logger.info('Handled')
   }

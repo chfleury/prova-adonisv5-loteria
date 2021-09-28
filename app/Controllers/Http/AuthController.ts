@@ -1,21 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
+
+import UserValidator from 'App/Validators/UserValidator'
 
 export default class AuthController {
   public async login({ auth, request, response }: HttpContextContract) {
-    const newSchema = schema.create({
-      email: schema.string({}, [rules.email()]),
-      password: schema.string({}, [rules.confirmed()]),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
+    await request.validate(UserValidator)
 
     const { email, password } = request.body()
     try {

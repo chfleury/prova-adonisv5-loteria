@@ -1,6 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Mail from '@ioc:Adonis/Addons/Mail'
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import UserValidator from 'App/Validators/UserValidator'
 
 import User from 'App/Models/User'
 
@@ -15,19 +15,8 @@ export default class UsersController {
     return await User.query().where('id', id).preload('profile')
   }
 
-  public async store({ request, response }: HttpContextContract) {
-    const newSchema = schema.create({
-      email: schema.string({}, [rules.email]),
-      password: schema.string({}, [rules.confirmed()]),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
+  public async store({ request }: HttpContextContract) {
+    await request.validate(UserValidator)
 
     const { email, password } = request.body()
 
@@ -48,19 +37,8 @@ export default class UsersController {
     return user
   }
 
-  public async update({ request, response }: HttpContextContract) {
-    const newSchema = schema.create({
-      email: schema.string({}, [rules.email]),
-      password: schema.string({}, [rules.confirmed()]),
-    })
-
-    try {
-      await request.validate({
-        schema: newSchema,
-      })
-    } catch (error) {
-      return response.badRequest(error.messages)
-    }
+  public async update({ request }: HttpContextContract) {
+    await request.validate(UserValidator)
 
     const { email, password } = request.body()
     const { id } = request.params()
