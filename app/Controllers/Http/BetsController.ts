@@ -23,43 +23,49 @@ export default class BetsController {
     }
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
     await request.validate(CreateBetValidator)
 
-    const trx = await Database.transaction()
+    // const trx = await Database.transaction()
 
     try {
-      const { gameId, userId, selectedNumbers } = request.body()
+      const bets = request.body().bets
 
-      const user = await User.findOrFail(userId)
+      const user = await User.findOrFail(bets[0].userId)
 
-      const game = await Game.findOrFail(gameId)
-      const totalPrice = game.price
+      // user.useTransaction(trx)
 
-      const bet = await Bet.create(
-        {
-          gameId,
-          userId,
-          selectedNumbers,
-          totalPrice,
-        },
-        { client: trx }
-      )
+      for (let i = 0; i < bets.length; i++) {
+        const bet = bets[i]
+        const game = await Game.findOrFail(bet.gameId)
+
+        const selectedNumbers = bet.selectedNumbers
+        const totalPrice = game.price
+
+        await Bet.create(
+          {
+            gameId: game.id,
+            userId: user.id,
+            selectedNumbers,
+            totalPrice,
+          }
+          // { client: trx }
+        )
+
+        await new NewBetMailer(user, game, selectedNumbers, totalPrice).sendLater()
+      }
 
       user.lastBetAt = DateTime.now()
 
-      user.useTransaction(trx)
       await user.save()
 
-      await new NewBetMailer(user, game, selectedNumbers, totalPrice).sendLater()
-
-      await trx.commit()
-
-      return bet
+      // await trx.commit()
+      return bets
     } catch (e) {
-      await trx.rollback()
+      // await trx.rollback()
 
-      return { error: 'error' }
+      response.status(400)
+      return { error: 'Verify if game and user id are correct' }
     }
   }
 

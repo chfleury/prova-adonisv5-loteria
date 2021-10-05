@@ -26,7 +26,7 @@ export default class UsersController {
       profileId: 2,
     })
 
-    await new NewUserMailer(user).send()
+    await new NewUserMailer(user).sendLater()
 
     return user
   }

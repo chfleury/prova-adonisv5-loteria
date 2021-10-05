@@ -20,7 +20,7 @@ export default class ForgotPasswordController {
 
     await user.save()
 
-    await new ForgotPasswordMailer(user).send()
+    await new ForgotPasswordMailer(user).sendLater()
   }
 
   public async update({ request, response }: HttpContextContract) {

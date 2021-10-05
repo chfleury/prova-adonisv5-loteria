@@ -5,9 +5,13 @@ export default class CreateBetValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    gameId: schema.number(),
-    userId: schema.number(),
-    selectedNumbers: schema.string(),
+    bets: schema.array().members(
+      schema.object().members({
+        gameId: schema.number(),
+        userId: schema.number(),
+        selectedNumbers: schema.string(),
+      })
+    ),
   })
 
   public messages = {}
