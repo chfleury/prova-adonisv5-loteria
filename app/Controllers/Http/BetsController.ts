@@ -26,18 +26,18 @@ export default class BetsController {
   public async store({ request, response }: HttpContextContract) {
     await request.validate(CreateBetValidator)
 
-    // const trx = await Database.transaction()
+    const trx = await Database.transaction()
 
     try {
       const bets = request.body().bets
 
-      const user = await User.findOrFail(bets[0].userId)
+      const user = await User.findOrFail(bets[0].userId, { client: trx })
 
-      // user.useTransaction(trx)
+      user.useTransaction(trx)
 
       for (let i = 0; i < bets.length; i++) {
         const bet = bets[i]
-        const game = await Game.findOrFail(bet.gameId)
+        const game = await Game.findOrFail(bet.gameId, { client: trx })
 
         const selectedNumbers = bet.selectedNumbers
         const totalPrice = game.price
@@ -48,8 +48,8 @@ export default class BetsController {
             userId: user.id,
             selectedNumbers,
             totalPrice,
-          }
-          // { client: trx }
+          },
+          { client: trx }
         )
 
         await new NewBetMailer(user, game, selectedNumbers, totalPrice).sendLater()
@@ -59,10 +59,10 @@ export default class BetsController {
 
       await user.save()
 
-      // await trx.commit()
+      await trx.commit()
       return bets
     } catch (e) {
-      // await trx.rollback()
+      await trx.rollback()
 
       response.status(400)
       return { error: 'Verify if game and user id are correct' }

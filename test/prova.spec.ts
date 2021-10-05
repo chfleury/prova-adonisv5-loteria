@@ -3,22 +3,9 @@ import supertest from 'supertest'
 
 const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`
 
-test.group('Welcome', () => {
-  // test('ensure home page works', async () => {
-  //   await supertest(BASE_URL).get('/').expect(200)
-  // })
-
-  // test('ensure user password gets hashed during save', async (assert) => {
-  //   const user = new User()
-  //   user.email = 'virk@adonisjs.com'
-  //   user.password = 'secret'
-  //   await user.save()
-
-  //   assert.notEqual(user.password, 'secret')
-  // })
-
-  test('create user', async () => {
-    await supertest(BASE_URL)
+test.group('Testes prova', () => {
+  test('it should create user', async (assert) => {
+    const response = await supertest(BASE_URL)
       .post('/users')
       .send({
         email: 'christiasn@gmail.com',
@@ -26,9 +13,15 @@ test.group('Welcome', () => {
         password_confirmation: 'senha',
       })
       .expect(200)
+
+    const user = response.body
+
+    // because id 1 is already admin user created by seeds
+    assert.equal(user.id, 2)
+    assert.equal(user.email, 'christiasn@gmail.com')
   })
 
-  test('login user', async () => {
+  test('it should login user', async () => {
     await supertest(BASE_URL)
       .post('/login')
       .send({
@@ -39,7 +32,7 @@ test.group('Welcome', () => {
       .expect(200)
   })
 
-  test('game CRUD', async (assert) => {
+  test('it should CRUD game ', async (assert) => {
     const response = await supertest(BASE_URL)
       .post('/login')
       .send({
@@ -55,7 +48,7 @@ test.group('Welcome', () => {
     const gameResponse = await supertest(BASE_URL)
       .post('/games')
       .send({
-        type: 'megasena',
+        type: 'quina',
         description: 'descricao quina',
         range: 80,
         price: 2.5,
@@ -68,12 +61,13 @@ test.group('Welcome', () => {
 
     var game = gameResponse.body
     const gameId = game.id
+
     // UPDATE GAME
     await supertest(BASE_URL)
       .put('/games/' + gameId)
       .send({
-        type: 'megasena',
-        description: 'descricao megasena',
+        type: 'lotofacil',
+        description: 'descricao lotofacil',
         range: 80,
         price: 2.5,
         maxNumber: 12,
@@ -89,7 +83,7 @@ test.group('Welcome', () => {
       .set('Authorization', 'bearer ' + token)
       .expect(200)
 
-    assert.equal(game.body.type, 'megasena')
+    assert.equal(game.body.type, 'lotofacil')
 
     // GET ALL GAMES
     var games = await supertest(BASE_URL)
@@ -97,7 +91,7 @@ test.group('Welcome', () => {
       .set('Authorization', 'bearer ' + token)
       .expect(200)
 
-    assert.equal(games.body[0].type, 'megasena')
+    assert.equal(games.body[0].type, 'lotofacil')
     assert.equal(games.body.length, 1)
 
     // DELETE GAMES
@@ -116,7 +110,7 @@ test.group('Welcome', () => {
     assert.equal(games.body.length, 0)
   })
 
-  test('create bet', async () => {
+  test('it should create bet', async (assert) => {
     const response = await supertest(BASE_URL)
       .post('/login')
       .send({
@@ -159,20 +153,21 @@ test.group('Welcome', () => {
       return a - b
     })
 
-    console.log(
-      await supertest(BASE_URL)
-        .post('/bets')
-        .send({
-          bets: [
-            {
-              gameId: game.id,
-              userId: 1,
-              selectedNumbers: selectedNumbers.join(''),
-            },
-          ],
-        })
-        .set('Authorization', 'bearer ' + token)
-        .expect(200)
-    )
+    const bet = await supertest(BASE_URL)
+      .post('/bets')
+      .send({
+        bets: [
+          {
+            gameId: game.id,
+            userId: 1,
+            selectedNumbers: selectedNumbers.join(''),
+          },
+        ],
+      })
+      .set('Authorization', 'bearer ' + token)
+      .expect(200)
+
+    assert.equal(bet.body[0].gameId, 2)
+    assert.equal(bet.body[0].userId, 1)
   })
 })
